@@ -10,9 +10,11 @@ public class Application {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long userId;
+    @Column(name = "user_id")
+private Long userId;
 
-    private Long jobId;
+@Column(name = "job_id")
+private Long jobId;
 
     private String status;
 

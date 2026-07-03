@@ -1,42 +1,102 @@
-import { Tabs } from 'expo-router';
-import React from 'react';
+import { Tabs } from "expo-router";
+import React from "react";
 
-import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { HapticTab } from "@/components/haptic-tab";
+import { IconSymbol } from "@/components/ui/icon-symbol";
+import { Colors } from "@/constants/theme";
+import { useColorScheme } from "@/hooks/use-color-scheme";
 
 export default function TabLayout() {
+
   const colorScheme = useColorScheme();
 
   return (
+
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+        tabBarActiveTintColor:
+          Colors[colorScheme ?? "light"].tint,
         headerShown: false,
         tabBarButton: HapticTab,
-      }}>
+      }}
+    >
+
+      <Tabs.Screen
+  name="home"
+  options={{
+    title: "Home",
+    tabBarIcon: ({ color }) => (
+      <IconSymbol size={28} name="house.fill" color={color} />
+    ),
+  }}
+/>
+
+<Tabs.Screen
+  name="jobs"
+  options={{
+    title: "Jobs",
+    tabBarIcon: ({ color }) => (
+      <IconSymbol size={28} name="paperplane.fill" color={color} />
+    ),
+  }}
+/>
+
+<Tabs.Screen
+  name="applications"
+  options={{
+    title: "Applications",
+    tabBarIcon: ({ color }) => (
+      <IconSymbol size={28} name="doc.text.fill" color={color} />
+    ),
+  }}
+/>
+
+<Tabs.Screen
+  name="profile"
+  options={{
+    title: "Profile",
+    tabBarIcon: ({ color }) => (
+      <IconSymbol size={28} name="person.fill" color={color} />
+    ),
+  }}
+/>
+ <Tabs.Screen
+  name="admin"
+  options={{
+    title: "Admin",
+    tabBarIcon: ({ color }) => (
+      <IconSymbol
+        size={28}
+        name="person.fill"
+        color={color}
+      />
+    ),
+  }}
+/>
+
+      {/* Hide these routes from the tab bar */}
+
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="explore"
-        options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          href: null,
         }}
       />
 
       <Tabs.Screen
-  name="applications"
-  options={{
-    title: "Applications",
-  }}
-/>
+        name="register"
+        options={{
+          href: null,
+        }}
+      />
+
+      <Tabs.Screen
+        name="explore"
+        options={{
+          href: null,
+        }}
+      />
+
     </Tabs>
   );
 }

@@ -7,6 +7,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.campus.placement.config.JwtUtil;
 import com.campus.placement.dto.LoginResponse;
+import com.campus.placement.dto.ProfileResponse;
+
+import com.campus.placement.dto.StudentResponse;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class UserService {
@@ -31,29 +36,60 @@ private JwtUtil jwtUtil;
         return userRepository.save(user);
     }
 
-    public LoginResponse loginUser(
-        String email,
-        String password) {
+    public LoginResponse loginUser(String email, String password) {
 
     User user = userRepository.findByEmail(email);
 
-    if (user != null &&
-            passwordEncoder.matches(
-                    password,
-                    user.getPassword())) {
-
-        String token =
-                jwtUtil.generateToken(email);
-
-        return new LoginResponse(
-                token,
-                user.getId()
-        );
+    if (user == null || !passwordEncoder.matches(password, user.getPassword())) {
+        throw new RuntimeException("Invalid Credentials");
     }
 
+    String token = jwtUtil.generateToken(email);
+
     return new LoginResponse(
-            "Invalid Credentials",
-            null
+            token,
+            user.getId(),
+            user.getRole()
     );
+}
+
+public ProfileResponse getProfile(String token) {
+
+    String email = jwtUtil.extractEmail(token);
+
+    User user = userRepository.findByEmail(email);
+
+    return new ProfileResponse(
+            user.getId(),
+            user.getName(),
+            user.getEmail(),
+            user.getRole()
+    );
+}
+
+public List<StudentResponse> getAllStudents() {
+
+    List<User> students =
+            userRepository.findByRole("STUDENT");
+
+    List<StudentResponse> response =
+            new ArrayList<>();
+
+    for (User user : students) {
+
+        response.add(
+
+                new StudentResponse(
+                        user.getId(),
+                        user.getName(),
+                        user.getEmail(),
+                        user.getRole()
+                )
+
+        );
+
+    }
+
+    return response;
 }
 }

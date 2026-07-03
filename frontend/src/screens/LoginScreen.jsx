@@ -31,12 +31,15 @@ export default function LoginScreen() {
         password,
       });
 
+      console.log(response.data);
+
     const token =
       response.data.token;
 
     const userId =
       response.data.userId;
-
+    
+    const role = response.data.role;
     await SecureStore.setItemAsync(
       "token",
       token
@@ -48,9 +51,10 @@ export default function LoginScreen() {
     );
 
     await SecureStore.setItemAsync(
-  "userId",
-  userId.toString()
+  "role",
+  role
 );
+
 
 console.log(
   "Saved User ID:",
@@ -62,7 +66,15 @@ console.log(
       "Login Successful"
     );
 
-    router.replace("/home");
+    if (role === "ADMIN") {
+
+  router.replace("/(admin)/dashboard");
+
+} else {
+
+  router.replace("/(student)/home");
+
+}
 
   } catch (error) {
 
@@ -73,6 +85,8 @@ console.log(
 
   }
 };
+
+
 
 
 

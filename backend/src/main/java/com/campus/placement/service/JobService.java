@@ -27,4 +27,26 @@ public class JobService {
             .findById(id)
             .orElse(null);
 }
+
+public Job updateJob(Long id, Job updatedJob) {
+
+    Job job = jobRepository.findById(id).orElse(null);
+
+    if (job == null) {
+        return null;
+    }
+
+    job.setTitle(updatedJob.getTitle());
+    job.setCompany(updatedJob.getCompany());
+    job.setLocation(updatedJob.getLocation());
+    job.setDescription(updatedJob.getDescription());
+
+    return jobRepository.save(job);
+}
+
+public void deleteJob(Long id) {
+
+    jobRepository.deleteById(id);
+
+}
 }

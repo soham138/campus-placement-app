@@ -9,7 +9,7 @@ import {
   useColorScheme,
 } from "react-native";
 
-import * as SecureStore from "expo-secure-store";
+
 import api from "../services/api";
 import {
   lightTheme,
@@ -38,62 +38,32 @@ export default function MyApplicationsScreen() {
 
   const fetchApplications = async () => {
 
-    try {
+  try {
 
-      const userId =
-        await SecureStore.getItemAsync(
-          "userId"
-        );
+    const response = await api.get(
+      "/applications/my-applications"
+    );
 
-      if (!userId) {
-        return;
-      }
+    console.log(response.data);
 
-      const response =
-        await api.get(
-          `/applications/my-applications/${userId}`
-        );
+    setApplications(response.data);
 
-      const applicationsData =
-        response.data;
+  } catch (error) {
 
-      const applicationsWithJobs =
-        await Promise.all(
+    console.log(error);
 
-          applicationsData.map(
-            async (application) => {
+    Alert.alert(
+      "Error",
+      "Failed to load applications"
+    );
 
-              const jobResponse =
-                await api.get(
-                  `/jobs/${application.jobId}`
-                );
+  } finally {
 
-              return {
-                ...application,
-                job:
-                  jobResponse.data,
-              };
-            }
-          )
-        );
+    setLoading(false);
 
-      setApplications(
-        applicationsWithJobs
-      );
+  }
 
-    } catch (error) {
-
-      Alert.alert(
-        "Error",
-        "Failed to load applications"
-      );
-
-    } finally {
-
-      setLoading(false);
-
-    }
-  };
+};
 
   const renderItem = ({ item }) => (
 
@@ -118,7 +88,7 @@ export default function MyApplicationsScreen() {
           },
         ]}
       >
-        {item.job.title}
+        {item.jobTitle}
       </Text>
 
       <Text
@@ -127,7 +97,7 @@ export default function MyApplicationsScreen() {
             theme.text,
         }}
       >
-        {item.job.company}
+        {item.company}
       </Text>
 
       <Text
@@ -137,7 +107,7 @@ export default function MyApplicationsScreen() {
           marginTop: 5,
         }}
       >
-        📍 {item.job.location}
+        📍 {item.location}
       </Text>
 
       <Text
@@ -187,9 +157,7 @@ export default function MyApplicationsScreen() {
       <FlatList
         data={applications}
         renderItem={renderItem}
-        keyExtractor={(item) =>
-          item.id.toString()
-        }
+        keyExtractor={(item) => item.applicationId.toString()}
       />
     </View>
   );

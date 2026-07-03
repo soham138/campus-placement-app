@@ -14,4 +14,6 @@ public interface ApplicationRepository
             Long userId,
             Long jobId
     );
+
+    List<Application> findAll();
 }

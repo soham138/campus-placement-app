@@ -80,14 +80,9 @@ console.log(
         return;
       }
 
-      await api.post(
-        "/applications/apply",
-        {
-          jobId: jobId,
-          userId: Number(userId),
-          status: "APPLIED",
-        }
-      );
+      await api.post("/applications/apply", {
+  jobId: jobId,
+});
 
       Alert.alert(
         "Success",
@@ -98,7 +93,7 @@ console.log(
 
       if (
         error.response &&
-        error.response.status === 500
+        error.response.status === 409
       ) {
 
         Alert.alert(
