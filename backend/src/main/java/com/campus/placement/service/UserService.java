@@ -12,6 +12,11 @@ import com.campus.placement.dto.ProfileResponse;
 import com.campus.placement.dto.StudentResponse;
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.web.multipart.MultipartFile;
+import java.io.File;
+import java.io.IOException;
+
+import java.util.UUID;
 
 @Service
 public class UserService {
@@ -60,11 +65,12 @@ public ProfileResponse getProfile(String token) {
     User user = userRepository.findByEmail(email);
 
     return new ProfileResponse(
-            user.getId(),
-            user.getName(),
-            user.getEmail(),
-            user.getRole()
-    );
+        user.getId(),
+        user.getName(),
+        user.getEmail(),
+        user.getRole(),
+        user.getResume()
+);
 }
 
 public List<StudentResponse> getAllStudents() {
@@ -80,16 +86,42 @@ public List<StudentResponse> getAllStudents() {
         response.add(
 
                 new StudentResponse(
-                        user.getId(),
-                        user.getName(),
-                        user.getEmail(),
-                        user.getRole()
-                )
+        user.getId(),
+        user.getName(),
+        user.getEmail(),
+        user.getRole(),
+        user.getResume()
+)
 
         );
 
     }
 
     return response;
+}
+
+public void uploadResume(String token, MultipartFile file) throws IOException {
+
+    String email = jwtUtil.extractEmail(token);
+
+    User user = userRepository.findByEmail(email);
+
+    File folder = new File(System.getProperty("user.dir") + "/uploads/resumes");
+
+    if (!folder.exists() && !folder.mkdirs()) {
+    throw new IOException("Unable to create upload folder");
+}
+
+    String fileName =
+            UUID.randomUUID() + "_" + file.getOriginalFilename();
+
+    File destination =
+            new File(folder, fileName);
+
+    file.transferTo(destination.toPath());
+
+    user.setResume(fileName);
+
+    userRepository.save(user);
 }
 }

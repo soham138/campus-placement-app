@@ -21,19 +21,17 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())   // IMPORTANT
                 .authorizeHttpRequests(auth -> auth
 
-        .requestMatchers("/api/auth/**").permitAll()
+    .requestMatchers("/api/auth/**").permitAll()
 
-        .requestMatchers("/api/admin/**")
-        .hasRole("ADMIN")
+    .requestMatchers("/api/users/resume/**").permitAll()
 
-        .requestMatchers("/api/jobs/**")
-        .authenticated()
+    .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
-        .requestMatchers("/api/applications/**")
-        .authenticated()
+    .requestMatchers("/api/jobs/**").authenticated()
 
-        .anyRequest()
-        .authenticated()
+    .requestMatchers("/api/applications/**").authenticated()
+
+    .anyRequest().authenticated()
 )
                 .addFilterBefore(jwtFilter,
                         UsernamePasswordAuthenticationFilter.class

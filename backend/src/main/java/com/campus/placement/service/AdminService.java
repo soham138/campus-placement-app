@@ -52,11 +52,12 @@ public class AdminService {
 
             response.add(
                     new StudentResponse(
-                            user.getId(),
-                            user.getName(),
-                            user.getEmail(),
-                            user.getRole()
-                    )
+    user.getId(),
+    user.getName(),
+    user.getEmail(),
+    user.getRole(),
+    user.getResume()
+)
             );
         }
 

@@ -11,6 +11,7 @@ public class User {
     private Long id;
 
     private String name;
+    private String resume;
 
     @Column(unique = true)
     private String email;
@@ -61,4 +62,12 @@ public class User {
     public void setRole(String role) {
         this.role = role;
     }
+
+    public String getResume() {
+    return resume;
+}
+
+public void setResume(String resume) {
+    this.resume = resume;
+}
 }
