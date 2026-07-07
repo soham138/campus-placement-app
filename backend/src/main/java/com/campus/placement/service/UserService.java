@@ -15,6 +15,9 @@ import java.util.List;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
+import com.campus.placement.dto.StudentDashboardResponse;
+import com.campus.placement.repository.JobRepository;
+import com.campus.placement.repository.ApplicationRepository;
 
 import java.util.UUID;
 
@@ -23,6 +26,12 @@ public class UserService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+private JobRepository jobRepository;
+
+@Autowired
+private ApplicationRepository applicationRepository;
 
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
@@ -123,5 +132,37 @@ public void uploadResume(String token, MultipartFile file) throws IOException {
     user.setResume(fileName);
 
     userRepository.save(user);
+}
+
+
+public StudentDashboardResponse getDashboard(String token)  {
+
+    String email = jwtUtil.extractEmail(token);
+
+    User user = userRepository.findByEmail(email);
+
+    long totalJobs = jobRepository.count();
+
+    long appliedJobs =
+            applicationRepository.countByUserId(user.getId());
+
+    long approvedJobs =
+            applicationRepository.countByUserIdAndStatus(
+                    user.getId(),
+                    "APPROVED"
+            );
+
+    long pendingJobs =
+            applicationRepository.countByUserIdAndStatus(
+                    user.getId(),
+                    "APPLIED"
+            );
+
+    return new StudentDashboardResponse(
+        totalJobs,
+        appliedJobs,
+        approvedJobs,
+        pendingJobs
+);
 }
 }

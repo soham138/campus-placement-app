@@ -7,11 +7,18 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+import java.util.ArrayList;
+import com.campus.placement.dto.JobResponse;
+import com.campus.placement.repository.ApplicationRepository;
+
 @Service
 public class JobService {
 
     @Autowired
     private JobRepository jobRepository;
+
+    @Autowired
+private ApplicationRepository applicationRepository;
 
     public Job addJob(Job job) {
         return jobRepository.save(job);
@@ -47,6 +54,40 @@ public Job updateJob(Long id, Job updatedJob) {
 public void deleteJob(Long id) {
 
     jobRepository.deleteById(id);
+
+}
+
+public List<JobResponse> getAllJobsWithApplicants() {
+
+    List<Job> jobs = jobRepository.findAll();
+
+    List<JobResponse> response = new ArrayList<>();
+
+    for (Job job : jobs) {
+
+        response.add(
+
+                new JobResponse(
+
+                        job.getId(),
+
+                        job.getTitle(),
+
+                        job.getCompany(),
+
+                        job.getLocation(),
+
+                        job.getDescription(),
+
+                        applicationRepository.countByJobId(job.getId())
+
+                )
+
+        );
+
+    }
+
+    return response;
 
 }
 }

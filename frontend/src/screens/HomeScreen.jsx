@@ -1,235 +1,355 @@
-import React from "react";
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  TouchableOpacity, 
-  Alert, 
-  SafeAreaView, 
+import React, { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Alert,
+  SafeAreaView,
   Platform,
-  ScrollView
+  ScrollView,
+  ActivityIndicator,
 } from "react-native";
+
 import { router } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import { Ionicons } from "@expo/vector-icons";
+import api from "../services/api";
 
 export default function HomeScreen() {
 
+  const [dashboard, setDashboard] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadDashboard();
+  }, []);
+
+  const loadDashboard = async () => {
+
+    try {
+
+      const response = await api.get("/users/dashboard");
+
+      setDashboard(response.data);
+
+    } catch (error) {
+
+      console.log(error);
+
+      Alert.alert("Error", "Unable to load dashboard");
+
+    } finally {
+
+      setLoading(false);
+
+    }
+
+  };
+
   const logout = () => {
+
     Alert.alert(
       "Sign Out",
-      "Are you sure you want to sign out of your account?",
+      "Are you sure you want to sign out?",
       [
-        { text: "Cancel", style: "cancel" },
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
         {
           text: "Sign Out",
           style: "destructive",
           onPress: async () => {
+
             await SecureStore.deleteItemAsync("token");
             await SecureStore.deleteItemAsync("userId");
+
             router.replace("/");
+
           },
         },
       ]
     );
+
   };
 
+  if (loading) {
+
+    return (
+      <SafeAreaView style={styles.loader}>
+        <ActivityIndicator size="large" color="#6366F1" />
+      </SafeAreaView>
+    );
+
+  }
+
   return (
+
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
-        
-        {/* HERO SECTION */}
+
+      <ScrollView
+        contentContainerStyle={styles.container}
+        showsVerticalScrollIndicator={false}
+      >
+
         <View style={styles.header}>
-          <TouchableOpacity style={styles.profileIcon} onPress={() => router.push("/profile")}>
-            <Ionicons name="person-circle" size={44} color="#1E293B" />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={logout} style={styles.logoutIcon}>
-            <Ionicons name="log-out-outline" size={28} color="#94A3B8" />
-          </TouchableOpacity>
-        </View>
 
-        <View style={styles.welcomeSection}>
-          <Text style={styles.greeting}>Hello, Future Leader!</Text>
-          <Text style={styles.title}>Kickstart your career journey today.</Text>
-        </View>
-
-        {/* BENTO GRID MENU */}
-        <View style={styles.grid}>
-          
-          {/* Main Action Card - Full Width */}
-          <TouchableOpacity 
-            style={[styles.card, styles.primaryCard]} 
-            activeOpacity={0.8}
-            onPress={() => router.push("/jobs")}
+          <TouchableOpacity
+            onPress={() => router.push("/profile")}
           >
-            <View style={styles.cardHeader}>
-              <View style={styles.iconWrapperLight}>
-                <Ionicons name="briefcase" size={24} color="#6366F1" />
-              </View>
-              <Ionicons name="arrow-forward" size={20} color="#FFFFFF" />
-            </View>
-            <Text style={styles.primaryCardTitle}>Explore New Jobs</Text>
-            <Text style={styles.primaryCardSub}>Find and apply for the latest campus placement drives.</Text>
+            <Ionicons
+              name="person-circle"
+              size={46}
+              color="#1E293B"
+            />
           </TouchableOpacity>
 
-          {/* Secondary Actions - Split Row */}
-          <View style={styles.row}>
-            
-            {/* Applications Card */}
-            <TouchableOpacity 
-              style={[styles.card, styles.halfCard]} 
-              activeOpacity={0.8}
-              onPress={() => router.push("/applications")}
-            >
-              <View style={[styles.iconWrapperDark, { backgroundColor: '#ECFDF5' }]}>
-                <Ionicons name="document-text" size={22} color="#10B981" />
-              </View>
-              <Text style={styles.cardTitle}>Applications</Text>
-              <Text style={styles.cardSub}>Track status</Text>
-            </TouchableOpacity>
+          <TouchableOpacity
+            onPress={logout}
+          >
+            <Ionicons
+              name="log-out-outline"
+              size={28}
+              color="#64748B"
+            />
+          </TouchableOpacity>
 
-            {/* Profile Card */}
-            <TouchableOpacity 
-              style={[styles.card, styles.halfCard]} 
-              activeOpacity={0.8}
-              onPress={() => router.push("/profile")}
-            >
-              <View style={[styles.iconWrapperDark, { backgroundColor: '#FEF2F2' }]}>
-                <Ionicons name="settings" size={22} color="#EF4444" />
-              </View>
-              <Text style={styles.cardTitle}>My Profile</Text>
-              <Text style={styles.cardSub}>Update resume</Text>
-            </TouchableOpacity>
-
-          </View>
         </View>
+
+        <Text style={styles.welcome}>
+          Welcome Back 👋
+        </Text>
+
+        <Text style={styles.subtitle}>
+          Campus Placement Dashboard
+        </Text>
+
+        {/* Dashboard Cards */}
+
+        <View style={styles.statsContainer}>
+
+          <View style={styles.statCard}>
+            <Text style={styles.statNumber}>
+              {dashboard.totalJobs}
+            </Text>
+            <Text style={styles.statTitle}>
+              Total Jobs
+            </Text>
+          </View>
+
+          <View style={styles.statCard}>
+            <Text style={styles.statNumber}>
+              {dashboard.appliedJobs}
+            </Text>
+            <Text style={styles.statTitle}>
+              Applied
+            </Text>
+          </View>
+
+          <View style={styles.statCard}>
+            <Text style={styles.statNumber}>
+              {dashboard.approvedJobs}
+            </Text>
+            <Text style={styles.statTitle}>
+              Approved
+            </Text>
+          </View>
+
+          <View style={styles.statCard}>
+            <Text style={styles.statNumber}>
+              {dashboard.pendingJobs}
+            </Text>
+            <Text style={styles.statTitle}>
+              Pending
+            </Text>
+          </View>
+
+        </View>
+
+        {/* Menu */}
+
+        <TouchableOpacity
+          style={styles.menuCard}
+          onPress={() => router.push("/jobs")}
+        >
+
+          <Ionicons
+            name="briefcase"
+            size={26}
+            color="#6366F1"
+          />
+
+          <View style={styles.menuTextContainer}>
+            <Text style={styles.menuTitle}>
+              View Jobs
+            </Text>
+            <Text style={styles.menuSubtitle}>
+              Browse all available jobs
+            </Text>
+          </View>
+
+          <Ionicons
+            name="chevron-forward"
+            size={22}
+            color="#999"
+          />
+
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.menuCard}
+          onPress={() => router.push("/applications")}
+        >
+
+          <Ionicons
+            name="document-text"
+            size={26}
+            color="#10B981"
+          />
+
+          <View style={styles.menuTextContainer}>
+            <Text style={styles.menuTitle}>
+              My Applications
+            </Text>
+            <Text style={styles.menuSubtitle}>
+              Track applied jobs
+            </Text>
+          </View>
+
+          <Ionicons
+            name="chevron-forward"
+            size={22}
+            color="#999"
+          />
+
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.menuCard}
+          onPress={() => router.push("/profile")}
+        >
+
+          <Ionicons
+            name="person"
+            size={26}
+            color="#EF4444"
+          />
+
+          <View style={styles.menuTextContainer}>
+            <Text style={styles.menuTitle}>
+              Profile
+            </Text>
+            <Text style={styles.menuSubtitle}>
+              View your profile & resume
+            </Text>
+          </View>
+
+          <Ionicons
+            name="chevron-forward"
+            size={22}
+            color="#999"
+          />
+
+        </TouchableOpacity>
 
       </ScrollView>
+
     </SafeAreaView>
+
   );
+
 }
 
 const styles = StyleSheet.create({
+
   safeArea: {
     flex: 1,
-    backgroundColor: "#F8FAFC", // Cool slate off-white
+    backgroundColor: "#F5F7FB",
   },
+
+  loader: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
   container: {
-    paddingHorizontal: 20,
-    paddingTop: Platform.OS === "android" ? 40 : 10,
-    paddingBottom: 40,
+    padding: 20,
+    paddingTop: Platform.OS === "android" ? 50 : 20,
   },
-  
-  // Header / Top Bar
+
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 24,
-  },
-  profileIcon: {
-    marginLeft: -4, // visually align with edge
-  },
-  logoutIcon: {
-    padding: 8,
   },
 
-  // Welcome Text Area
-  welcomeSection: {
-    marginBottom: 32,
-  },
-  greeting: {
-    fontSize: 16,
-    color: "#64748B",
-    fontWeight: "600",
-    marginBottom: 8,
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: "800",
-    color: "#0F172A",
-    lineHeight: 40,
+  welcome: {
+    marginTop: 20,
+    fontSize: 28,
+    fontWeight: "bold",
+    color: "#111",
   },
 
-  // Grid Layout
-  grid: {
-    display: "flex",
-    gap: 16,
+  subtitle: {
+    marginTop: 5,
+    color: "#666",
+    marginBottom: 25,
   },
-  row: {
+
+  statsContainer: {
     flexDirection: "row",
+    flexWrap: "wrap",
     justifyContent: "space-between",
-    gap: 16, // Requires React Native 0.71+ (use margin on children if older)
+    marginBottom: 20,
   },
 
-  // Base Card Styles
-  card: {
-    borderRadius: 24,
-    padding: 24,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 12,
+  statCard: {
+    width: "48%",
+    backgroundColor: "#fff",
+    borderRadius: 18,
+    padding: 20,
+    marginBottom: 15,
+    alignItems: "center",
+    elevation: 3,
+  },
+
+  statNumber: {
+    fontSize: 30,
+    fontWeight: "bold",
+    color: "#6366F1",
+  },
+
+  statTitle: {
+    marginTop: 8,
+    color: "#555",
+    fontWeight: "600",
+  },
+
+  menuCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#fff",
+    borderRadius: 18,
+    padding: 18,
+    marginBottom: 15,
     elevation: 2,
   },
 
-  // Primary Card (Jobs)
-  primaryCard: {
-    backgroundColor: "#6366F1", // Indigo
-    minHeight: 180,
-    justifyContent: "space-between",
-  },
-  cardHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  iconWrapperLight: {
-    width: 48,
-    height: 48,
-    borderRadius: 16,
-    backgroundColor: "#FFFFFF",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  primaryCardTitle: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: "#FFFFFF",
-    marginBottom: 8,
-  },
-  primaryCardSub: {
-    fontSize: 14,
-    color: "#E0E7FF",
-    fontWeight: "500",
-    lineHeight: 20,
+  menuTextContainer: {
+    flex: 1,
+    marginLeft: 15,
   },
 
-  // Half Cards (Applications & Profile)
-  halfCard: {
-    flex: 1,
-    backgroundColor: "#FFFFFF",
-    minHeight: 160,
-    justifyContent: "space-between",
-  },
-  iconWrapperDark: {
-    width: 44,
-    height: 44,
-    borderRadius: 14,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  cardTitle: {
-    fontSize: 18,
+  menuTitle: {
+    fontSize: 17,
     fontWeight: "700",
-    color: "#1E293B",
-    marginBottom: 4,
   },
-  cardSub: {
-    fontSize: 13,
-    color: "#94A3B8",
-    fontWeight: "500",
+
+  menuSubtitle: {
+    color: "#777",
+    marginTop: 3,
   },
+
 });

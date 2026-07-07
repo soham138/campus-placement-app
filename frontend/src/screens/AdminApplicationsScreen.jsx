@@ -9,22 +9,56 @@ import {
   Alert,
   SafeAreaView,
   Platform,
+  TextInput,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import api from "../services/api";
 
 export default function AdminApplicationsScreen() {
   const [applications, setApplications] = useState([]);
-  const [loading, setLoading] = useState(true);
+const [filteredApplications, setFilteredApplications] = useState([]);
+const [loading, setLoading] = useState(true);
+
+const [search, setSearch] = useState("");
+const [statusFilter, setStatusFilter] = useState("ALL");
 
   useEffect(() => {
     loadApplications();
+    
   }, []);
+useEffect(() => {
 
+  let list = applications;
+
+  if (search !== "") {
+
+    list = list.filter(item =>
+  item.studentName.toLowerCase().includes(search.toLowerCase()) ||
+  item.email.toLowerCase().includes(search.toLowerCase()) ||
+  item.jobTitle.toLowerCase().includes(search.toLowerCase())
+);
+  
+
+  }
+
+  if (statusFilter !== "ALL") {
+
+    list = list.filter(
+
+      item => item.status === statusFilter
+
+    );
+
+  }
+
+  setFilteredApplications(list);
+
+}, [search, statusFilter, applications]);
   const loadApplications = async () => {
     try {
       const response = await api.get("/admin/applications");
       setApplications(response.data);
+setFilteredApplications(response.data);
     } catch (e) {
       Alert.alert("Error", "Unable to load applications");
     } finally {
@@ -50,11 +84,84 @@ export default function AdminApplicationsScreen() {
   };
 
   const renderHeader = () => (
-    <View style={styles.headerContainer}>
-      <Text style={styles.greeting}>Admin Portal</Text>
-      <Text style={styles.pageTitle}>Review Applications</Text>
-    </View>
-  );
+
+<View style={styles.headerContainer}>
+
+<Text style={styles.greeting}>
+Admin Portal
+</Text>
+
+<Text style={styles.pageTitle}>
+Review Applications
+</Text>
+
+<View style={styles.searchBox}>
+
+<Ionicons
+name="search"
+size={20}
+color="#94A3B8"
+/>
+
+<TextInput
+placeholder="Search student..."
+value={search}
+onChangeText={setSearch}
+style={styles.searchInput}
+/>
+
+</View>
+
+<View style={styles.filterRow}>
+
+{[
+  "ALL",
+  "APPROVED",
+  "REJECTED",
+  "PENDING"
+].map(item=>(
+
+<TouchableOpacity
+
+key={item}
+
+style={[
+
+styles.filterButton,
+
+statusFilter===item && styles.filterActive
+
+]}
+
+onPress={()=>setStatusFilter(item)}
+
+>
+
+<Text
+
+style={[
+
+styles.filterText,
+
+statusFilter===item && styles.filterActiveText
+
+]}
+
+>
+
+{item}
+
+</Text>
+
+</TouchableOpacity>
+
+))}
+
+</View>
+
+</View>
+
+);
 
   const renderItem = ({ item }) => {
     const statusConfig = getStatusStyle(item.status);
@@ -100,16 +207,29 @@ export default function AdminApplicationsScreen() {
         {/* Bottom Row: Actions */}
         <View style={styles.actionRow}>
           <TouchableOpacity
-            style={[styles.actionBtn, styles.approveBtn]}
-            onPress={() => updateStatus(item.applicationId, "APPROVED")}
-            activeOpacity={0.8}
-          >
+disabled={item.status === "APPROVED"}
+style={[
+  styles.actionBtn,
+  styles.approveBtn,
+  item.status === "APPROVED" && {
+    backgroundColor: "#A7F3D0",
+  },
+]}
+onPress={() => updateStatus(item.applicationId, "APPROVED")}
+>
             <Ionicons name="checkmark-circle-outline" size={18} color="#FFFFFF" />
             <Text style={styles.approveText}>Approve</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.actionBtn, styles.rejectBtn]}
+disabled={item.status === "REJECTED"}
+style={[
+  styles.actionBtn,
+  styles.rejectBtn,
+  item.status === "REJECTED" && {
+    opacity: 0.6,
+  },
+]}
             onPress={() => updateStatus(item.applicationId, "REJECTED")}
             activeOpacity={0.8}
           >
@@ -135,7 +255,7 @@ export default function AdminApplicationsScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <FlatList
-        data={applications}
+        data={filteredApplications}
         keyExtractor={(item) => item.applicationId.toString()}
         renderItem={renderItem}
         ListHeaderComponent={renderHeader}
@@ -322,4 +442,53 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "700",
   },
+
+  searchBox: {
+  flexDirection: "row",
+  alignItems: "center",
+  backgroundColor: "#FFFFFF",
+  borderRadius: 16,
+  paddingHorizontal: 16,
+  marginTop: 20,
+  height: 52,
+  shadowColor: "#000",
+  shadowOpacity: 0.05,
+  shadowRadius: 8,
+  elevation: 2,
+},
+
+searchInput: {
+  flex: 1,
+  marginLeft: 10,
+  fontSize: 15,
+  color: "#1E293B",
+},
+
+filterRow: {
+  flexDirection: "row",
+  flexWrap: "wrap",
+  marginTop: 15,
+},
+
+filterButton: {
+  backgroundColor: "#E2E8F0",
+  paddingHorizontal: 14,
+  paddingVertical: 8,
+  borderRadius: 20,
+  marginRight: 10,
+  marginBottom: 10,
+},
+
+filterActive: {
+  backgroundColor: "#6366F1",
+},
+
+filterText: {
+  color: "#475569",
+  fontWeight: "600",
+},
+
+filterActiveText: {
+  color: "#FFFFFF",
+},
 });

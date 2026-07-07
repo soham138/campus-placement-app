@@ -12,6 +12,7 @@ import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.MediaType;
+import com.campus.placement.dto.StudentDashboardResponse;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -23,6 +24,16 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+
+    @GetMapping("/dashboard")
+public StudentDashboardResponse getDashboard(
+        @RequestHeader("Authorization") String authHeader
+) {
+
+    String token = authHeader.substring(7);
+
+    return userService.getDashboard(token);
+}
 
     @GetMapping("/profile")
     public ProfileResponse getProfile(

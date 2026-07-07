@@ -16,4 +16,15 @@ public interface ApplicationRepository
     );
 
     List<Application> findAll();
+
+    long countByStatus(String status);
+
+    long countByUserId(Long userId);
+
+    long countByUserIdAndStatus(
+            Long userId,
+            String status
+    );
+
+    long countByJobId(Long jobId);
 }

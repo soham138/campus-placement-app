@@ -30,16 +30,33 @@ public class AdminService {
     // Dashboard Statistics
     public DashboardResponse getDashboard() {
 
-        long students = userRepository.count();
-        long jobs = jobRepository.count();
-        long applications = applicationRepository.count();
+    long students =
+            userRepository.findByRole("STUDENT").size();
 
-        return new DashboardResponse(
-                students,
-                jobs,
-                applications
-        );
-    }
+    long jobs =
+            jobRepository.count();
+
+    long applications =
+            applicationRepository.count();
+
+    long approved =
+            applicationRepository.countByStatus("APPROVED");
+
+    long rejected =
+            applicationRepository.countByStatus("REJECTED");
+
+    long pending =
+            applicationRepository.countByStatus("APPLIED");
+
+    return new DashboardResponse(
+            students,
+            jobs,
+            applications,
+            approved,
+            rejected,
+            pending
+    );
+}
 
     // Get All Students
     public List<StudentResponse> getAllStudents() {

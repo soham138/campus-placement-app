@@ -6,6 +6,7 @@ import com.campus.placement.service.JobService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
+import com.campus.placement.dto.JobResponse;
 
 
 import java.util.List;
@@ -24,9 +25,9 @@ public class JobController {
     }
 
     @GetMapping
-    public List<Job> getAllJobs() {
-        return jobService.getAllJobs();
-    }
+public List<JobResponse> getAllJobs() {
+    return jobService.getAllJobsWithApplicants();
+}
 
     @GetMapping("/{id}")
     public Job getJobById(

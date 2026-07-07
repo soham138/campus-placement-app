@@ -24,13 +24,11 @@ export default function Dashboard() {
 
   const loadDashboard = async () => {
     try {
-      // NOTE: Ensure your backend '/admin/dashboard' endpoint counts ONLY 
-      // users where role === 'STUDENT' for the totalStudents property.
       const response = await api.get("/admin/dashboard");
       setData(response.data);
     } catch (error) {
-      console.log(error);
-      Alert.alert("Error", "Failed to load dashboard data");
+      console.log(error.response?.data || error.message);
+      Alert.alert("Error", "Unable to load dashboard");
     }
   };
 
@@ -60,73 +58,181 @@ export default function Dashboard() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView 
-        contentContainerStyle={styles.container} 
+      <ScrollView
+        contentContainerStyle={styles.container}
         showsVerticalScrollIndicator={false}
       >
-        
-        {/* Header Section */}
+        {/* Header */}
         <View style={styles.header}>
-          <View style={styles.headerText}>
+          <View>
             <Text style={styles.greeting}>Admin Portal</Text>
             <Text style={styles.title}>Dashboard</Text>
           </View>
-          <TouchableOpacity 
-            style={styles.logoutIconBtn} 
+
+          <TouchableOpacity
+            style={styles.logoutIconBtn}
             onPress={logout}
-            activeOpacity={0.7}
           >
-            <Ionicons name="log-out-outline" size={24} color="#EF4444" />
+            <Ionicons
+              name="log-out-outline"
+              size={24}
+              color="#EF4444"
+            />
           </TouchableOpacity>
         </View>
 
-        {/* Bento Grid Stats */}
-        <View style={styles.grid}>
-          
-          {/* Main Stat Card - Students */}
-          <View style={[styles.card, styles.primaryCard]}>
-            <View style={styles.cardHeader}>
-              <View style={[styles.iconWrapper, { backgroundColor: "#EEF2FF" }]}>
-                <Ionicons name="people" size={28} color="#6366F1" />
-              </View>
-            </View>
-            <View style={styles.cardBody}>
-              <Text style={styles.number}>{data.totalStudents}</Text>
-              <Text style={styles.cardTitle}>Registered Students</Text>
+        {/* Students */}
+        <View style={[styles.card, styles.primaryCard]}>
+          <View style={styles.cardHeader}>
+            <View
+              style={[
+                styles.iconWrapper,
+                { backgroundColor: "#EEF2FF" },
+              ]}
+            >
+              <Ionicons
+                name="people"
+                size={28}
+                color="#6366F1"
+              />
             </View>
           </View>
 
-          {/* Split Row for Jobs & Applications */}
-          <View style={styles.row}>
-            
-            {/* Total Jobs Card */}
-            <View style={[styles.card, styles.halfCard]}>
-              <View style={styles.cardHeader}>
-                <View style={[styles.iconWrapper, { backgroundColor: "#FFF7ED", width: 40, height: 40 }]}>
-                  <Ionicons name="briefcase" size={20} color="#F59E0B" />
-                </View>
-              </View>
-              <View style={styles.cardBody}>
-                <Text style={styles.numberSmall}>{data.totalJobs}</Text>
-                <Text style={styles.cardTitleSmall}>Total Jobs</Text>
-              </View>
+          <View style={styles.cardBody}>
+            <Text style={styles.number}>
+              {data.totalStudents}
+            </Text>
+
+            <Text style={styles.cardTitle}>
+              Registered Students
+            </Text>
+          </View>
+        </View>
+
+        {/* Jobs + Applications */}
+        <View style={styles.row}>
+          <View style={[styles.card, styles.halfCard]}>
+            <View
+              style={[
+                styles.smallIcon,
+                { backgroundColor: "#FFF7ED" },
+              ]}
+            >
+              <Ionicons
+                name="briefcase"
+                size={22}
+                color="#F59E0B"
+              />
             </View>
 
-            {/* Total Applications Card */}
-            <View style={[styles.card, styles.halfCard]}>
-              <View style={styles.cardHeader}>
-                <View style={[styles.iconWrapper, { backgroundColor: "#ECFDF5", width: 40, height: 40 }]}>
-                  <Ionicons name="document-text" size={20} color="#10B981" />
-                </View>
-              </View>
-              <View style={styles.cardBody}>
-                <Text style={styles.numberSmall}>{data.totalApplications}</Text>
-                <Text style={styles.cardTitleSmall}>Applications</Text>
-              </View>
-            </View>
+            <Text style={styles.numberSmall}>
+              {data.totalJobs}
+            </Text>
 
+            <Text style={styles.cardTitleSmall}>
+              Jobs
+            </Text>
           </View>
 
+          <View style={[styles.card, styles.halfCard]}>
+            <View
+              style={[
+                styles.smallIcon,
+                { backgroundColor: "#ECFDF5" },
+              ]}
+            >
+              <Ionicons
+                name="document-text"
+                size={22}
+                color="#10B981"
+              />
+            </View>
+
+            <Text style={styles.numberSmall}>
+              {data.totalApplications}
+            </Text>
+
+            <Text style={styles.cardTitleSmall}>
+              Applications
+            </Text>
+          </View>
+        </View>
+
+        {/* Approved + Pending */}
+        <View style={styles.row}>
+          <View style={[styles.card, styles.halfCard]}>
+            <View
+              style={[
+                styles.smallIcon,
+                { backgroundColor: "#DCFCE7" },
+              ]}
+            >
+              <Ionicons
+                name="checkmark-circle"
+                size={22}
+                color="#22C55E"
+              />
+            </View>
+
+            <Text style={styles.numberSmall}>
+              {data.approvedApplications}
+            </Text>
+
+            <Text style={styles.cardTitleSmall}>
+              Approved
+            </Text>
+          </View>
+
+          <View style={[styles.card, styles.halfCard]}>
+            <View
+              style={[
+                styles.smallIcon,
+                { backgroundColor: "#FEF9C3" },
+              ]}
+            >
+              <Ionicons
+                name="time"
+                size={22}
+                color="#EAB308"
+              />
+            </View>
+
+            <Text style={styles.numberSmall}>
+              {data.pendingApplications}
+            </Text>
+
+            <Text style={styles.cardTitleSmall}>
+              Pending
+            </Text>
+          </View>
+        </View>
+
+        {/* Rejected */}
+        <View style={[styles.card, styles.primaryCard]}>
+          <View style={styles.cardHeader}>
+            <View
+              style={[
+                styles.iconWrapper,
+                { backgroundColor: "#FEE2E2" },
+              ]}
+            >
+              <Ionicons
+                name="close-circle"
+                size={28}
+                color="#EF4444"
+              />
+            </View>
+          </View>
+
+          <View style={styles.cardBody}>
+            <Text style={styles.number}>
+              {data.rejectedApplications}
+            </Text>
+
+            <Text style={styles.cardTitle}>
+              Rejected Applications
+            </Text>
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -136,98 +242,74 @@ export default function Dashboard() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#F8FAFC", // Slate background
+    backgroundColor: "#F8FAFC",
   },
+
   loader: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#F8FAFC",
   },
+
   container: {
     paddingHorizontal: 20,
     paddingTop: Platform.OS === "android" ? 40 : 20,
     paddingBottom: 40,
   },
 
-  // Header Styles
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 32,
-    marginTop: 10,
+    marginBottom: 30,
   },
-  headerText: {
-    flex: 1,
-  },
+
   greeting: {
     fontSize: 16,
     color: "#64748B",
     fontWeight: "600",
-    marginBottom: 4,
   },
+
   title: {
     fontSize: 32,
     fontWeight: "800",
     color: "#0F172A",
-    letterSpacing: -0.5,
   },
+
   logoutIconBtn: {
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: "#FEF2F2", // Soft red background
+    backgroundColor: "#FEF2F2",
     justifyContent: "center",
     alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#FEE2E2",
   },
 
-  // Grid Layout
-  grid: {
-    display: "flex",
-    gap: 16,
-  },
   row: {
     flexDirection: "row",
     justifyContent: "space-between",
-    gap: 16,
+    marginBottom: 16,
   },
 
-  // Base Card Styles
   card: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 24,
-    padding: 24,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 12,
-    elevation: 2,
+    backgroundColor: "#fff",
+    borderRadius: 20,
+    padding: 20,
+    elevation: 3,
   },
 
-  // Primary Card (Students)
   primaryCard: {
     marginBottom: 16,
-    minHeight: 180,
-    justifyContent: "space-between",
-  },
-  
-  // Half Cards (Jobs & Apps)
-  halfCard: {
-    flex: 1,
-    minHeight: 160,
-    padding: 20,
-    justifyContent: "space-between",
   },
 
-  // Card Content
-  cardHeader: {
-    flexDirection: "row",
-    justifyContent: "flex-start",
-    alignItems: "center",
+  halfCard: {
+    width: "48%",
   },
+
+  cardHeader: {
+    marginBottom: 15,
+  },
+
   iconWrapper: {
     width: 56,
     height: 56,
@@ -235,31 +317,41 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  cardBody: {
-    marginTop: 16,
+
+  smallIcon: {
+    width: 42,
+    height: 42,
+    borderRadius: 12,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 15,
   },
 
-  // Typography for Primary Card
+  cardBody: {
+    marginTop: 5,
+  },
+
   number: {
-    fontSize: 48,
+    fontSize: 42,
     fontWeight: "800",
     color: "#1E293B",
-    marginBottom: 4,
   },
+
+  numberSmall: {
+    fontSize: 30,
+    fontWeight: "800",
+    color: "#1E293B",
+  },
+
   cardTitle: {
+    marginTop: 6,
     fontSize: 16,
     color: "#64748B",
     fontWeight: "600",
   },
 
-  // Typography for Half Cards
-  numberSmall: {
-    fontSize: 32,
-    fontWeight: "800",
-    color: "#1E293B",
-    marginBottom: 4,
-  },
   cardTitleSmall: {
+    marginTop: 5,
     fontSize: 14,
     color: "#64748B",
     fontWeight: "600",

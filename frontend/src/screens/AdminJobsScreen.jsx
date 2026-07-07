@@ -9,6 +9,9 @@ import {
   StyleSheet,
   SafeAreaView,
   Platform,
+  TextInput,
+  Modal,
+  ScrollView,
 } from "react-native";
 import { router } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
@@ -18,11 +21,29 @@ import api from "../services/api";
 
 export default function AdminJobsScreen() {
   const [jobs, setJobs] = useState([]);
+  const [filteredJobs, setFilteredJobs] = useState([]);
+  const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+
+  // Modal State
+  const [selectedJob, setSelectedJob] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
 
   useEffect(() => {
     fetchJobs();
   }, []);
+
+  useEffect(() => {
+    let list = jobs;
+    if (search !== "") {
+      list = list.filter(
+        (job) =>
+          job.title.toLowerCase().includes(search.toLowerCase()) ||
+          job.company.toLowerCase().includes(search.toLowerCase())
+      );
+    }
+    setFilteredJobs(list);
+  }, [search, jobs]);
 
   useFocusEffect(
     useCallback(() => {
@@ -34,6 +55,7 @@ export default function AdminJobsScreen() {
     try {
       const response = await api.get("/jobs");
       setJobs(response.data);
+      setFilteredJobs(response.data);
     } catch (error) {
       Alert.alert("Error", "Failed to load jobs");
     } finally {
@@ -67,33 +89,50 @@ export default function AdminJobsScreen() {
     );
   };
 
+  const openJobDetails = (job) => {
+    setSelectedJob(job);
+    setModalVisible(true);
+  };
+
   const renderJob = ({ item }) => (
     <View style={styles.card}>
-      {/* Top Header: Icon + Title + Company */}
-      <View style={styles.cardHeader}>
-        <View style={styles.iconWrapper}>
-          <Ionicons name="business" size={24} color="#6366F1" />
+      {/* Tappable Area for Modal */}
+      <TouchableOpacity 
+        activeOpacity={0.7} 
+        onPress={() => openJobDetails(item)}
+      >
+        {/* Top Header: Icon + Title + Company */}
+        <View style={styles.cardHeader}>
+          <View style={styles.iconWrapper}>
+            <Ionicons name="business" size={24} color="#6366F1" />
+          </View>
+          <View style={styles.headerText}>
+            <Text style={styles.jobTitle} numberOfLines={1}>
+              {item.title}
+            </Text>
+            <Text style={styles.company} numberOfLines={1}>
+              {item.company}
+            </Text>
+            <View style={styles.applicantRow}>
+              <Ionicons name="people" size={15} color="#6366F1" />
+              <Text style={styles.applicantText}>
+                {item.applicants || 0} Applicants
+              </Text>
+            </View>
+          </View>
         </View>
-        <View style={styles.headerText}>
-          <Text style={styles.jobTitle} numberOfLines={1}>
-            {item.title}
-          </Text>
-          <Text style={styles.company} numberOfLines={1}>
-            {item.company}
-          </Text>
+
+        {/* Location Row */}
+        <View style={styles.locationRow}>
+          <Ionicons name="location" size={16} color="#94A3B8" />
+          <Text style={styles.locationText}>{item.location}</Text>
         </View>
-      </View>
 
-      {/* Location Row */}
-      <View style={styles.locationRow}>
-        <Ionicons name="location" size={16} color="#94A3B8" />
-        <Text style={styles.locationText}>{item.location}</Text>
-      </View>
-
-      {/* Description */}
-      <Text style={styles.description} numberOfLines={2}>
-        {item.description}
-      </Text>
+        {/* Description */}
+        <Text style={styles.description} numberOfLines={2}>
+          {item.description}
+        </Text>
+      </TouchableOpacity>
 
       <View style={styles.divider} />
 
@@ -125,13 +164,6 @@ export default function AdminJobsScreen() {
     </View>
   );
 
-  const renderHeader = () => (
-    <View style={styles.headerContainer}>
-      <Text style={styles.greeting}>Admin Portal</Text>
-      <Text style={styles.pageTitle}>Manage Jobs</Text>
-    </View>
-  );
-
   if (loading) {
     return (
       <View style={styles.loader}>
@@ -144,18 +176,38 @@ export default function AdminJobsScreen() {
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
         
+        {/* Header & Search */}
+        <View style={styles.headerContainer}>
+          <Text style={styles.greeting}>Admin Portal</Text>
+          <Text style={styles.pageTitle}>Manage Jobs</Text>
+
+          <View style={styles.searchBox}>
+            <Ionicons name="search" size={20} color="#94A3B8" />
+            <TextInput
+              placeholder="Search by title or company..."
+              placeholderTextColor="#94A3B8"
+              value={search}
+              onChangeText={setSearch}
+              style={styles.searchInput}
+              autoCorrect={false}
+            />
+          </View>
+        </View>
+
         {/* Job List */}
         <FlatList
-          data={jobs}
+          data={filteredJobs}
           keyExtractor={(item) => item.id.toString()}
           renderItem={renderJob}
-          ListHeaderComponent={renderHeader}
           contentContainerStyle={styles.listContainer}
           showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
               <Ionicons name="briefcase-outline" size={48} color="#CBD5E1" />
-              <Text style={styles.emptyText}>No jobs posted yet</Text>
+              <Text style={styles.emptyText}>
+                {search ? "No jobs match your search" : "No jobs posted yet"}
+              </Text>
             </View>
           }
         />
@@ -173,6 +225,63 @@ export default function AdminJobsScreen() {
         </View>
 
       </View>
+
+      {/* Elegant Details Modal */}
+      <Modal visible={modalVisible} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            
+            <View style={styles.modalHeader}>
+              <View style={styles.modalIconWrapper}>
+                <Ionicons name="briefcase" size={24} color="#6366F1" />
+              </View>
+              <Text style={styles.modalTitle}>Job Details</Text>
+            </View>
+
+            {selectedJob && (
+              <ScrollView style={styles.modalBody} showsVerticalScrollIndicator={false}>
+                
+                <View style={styles.modalDetailBlock}>
+                  <Text style={styles.modalLabel}>Role / Title</Text>
+                  <Text style={styles.modalValue}>{selectedJob.title}</Text>
+                </View>
+
+                <View style={styles.modalDetailBlock}>
+                  <Text style={styles.modalLabel}>Company</Text>
+                  <Text style={styles.modalValue}>{selectedJob.company}</Text>
+                </View>
+
+                <View style={styles.modalDetailBlock}>
+                  <Text style={styles.modalLabel}>Location</Text>
+                  <Text style={styles.modalValue}>{selectedJob.location}</Text>
+                </View>
+                
+                <View style={styles.modalDetailBlock}>
+                  <Text style={styles.modalLabel}>Total Applicants</Text>
+                  <Text style={[styles.modalValue, { color: "#6366F1" }]}>
+                    {selectedJob.applicants || 0} Students Applied
+                  </Text>
+                </View>
+
+                <View style={[styles.modalDetailBlock, { borderBottomWidth: 0, paddingBottom: 0 }]}>
+                  <Text style={styles.modalLabel}>Description</Text>
+                  <Text style={styles.modalDescriptionText}>{selectedJob.description}</Text>
+                </View>
+
+              </ScrollView>
+            )}
+
+            <TouchableOpacity
+              style={styles.modalCloseBtn}
+              onPress={() => setModalVisible(false)}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.modalCloseText}>Done</Text>
+            </TouchableOpacity>
+
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -194,8 +303,9 @@ const styles = StyleSheet.create({
   
   // Header Styles
   headerContainer: {
-    marginBottom: 24,
-    marginTop: Platform.OS === "android" ? 20 : 10,
+    paddingHorizontal: 20,
+    marginBottom: 16,
+    marginTop: Platform.OS === "android" ? 45 : 25, 
   },
   greeting: {
     fontSize: 16,
@@ -210,10 +320,33 @@ const styles = StyleSheet.create({
     letterSpacing: -0.5,
   },
 
+  // Search Box Styles
+  searchBox: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    marginTop: 20,
+    height: 56,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.03,
+    shadowRadius: 8,
+    elevation: 1,
+  },
+  searchInput: {
+    flex: 1,
+    marginLeft: 10,
+    fontSize: 16,
+    color: "#1E293B",
+    fontWeight: "500",
+  },
+
   // List Styles
   listContainer: {
     paddingHorizontal: 20,
-    paddingBottom: 100, // Extra padding so bottom items aren't hidden by the sticky footer
+    paddingBottom: 100, 
   },
   emptyContainer: {
     alignItems: "center",
@@ -227,11 +360,11 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
 
-  // Card Styles (Bento Theme)
+  // Card Styles
   card: {
     backgroundColor: "#FFFFFF",
     borderRadius: 24,
-    padding: 24,
+    padding: 20,
     marginBottom: 16,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
@@ -266,6 +399,17 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: "#64748B",
     fontWeight: "500",
+  },
+  applicantRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 6,
+  },
+  applicantText: {
+    marginLeft: 6,
+    color: "#6366F1",
+    fontWeight: "700",
+    fontSize: 13,
   },
 
   // Location Row
@@ -311,17 +455,17 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   editBtn: {
-    backgroundColor: "#EEF2FF", // Soft Indigo
+    backgroundColor: "#EEF2FF",
   },
   deleteBtn: {
-    backgroundColor: "#FEF2F2", // Soft Red
+    backgroundColor: "#FEF2F2",
   },
   actionText: {
     fontSize: 15,
     fontWeight: "700",
   },
 
-  // Sticky Footer & Add Button
+  // Sticky Footer
   footer: {
     position: "absolute",
     bottom: 0,
@@ -332,7 +476,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(248, 250, 252, 0.9)", // Blends with background
   },
   addButton: {
-    backgroundColor: "#6366F1", // Primary Indigo
+    backgroundColor: "#6366F1",
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
@@ -346,6 +490,86 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   addText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "700",
+  },
+
+  // Modal Styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(15, 23, 42, 0.4)", // Dark slate overlay
+    justifyContent: "center",
+    padding: 20,
+  },
+  modalCard: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 28,
+    padding: 24,
+    maxHeight: "80%", // Ensures it doesn't overflow the screen
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.1,
+    shadowRadius: 20,
+    elevation: 10,
+  },
+  modalHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  modalIconWrapper: {
+    width: 44,
+    height: 44,
+    borderRadius: 16,
+    backgroundColor: "#EEF2FF",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 16,
+  },
+  modalTitle: {
+    fontSize: 22,
+    fontWeight: "800",
+    color: "#1E293B",
+  },
+  modalBody: {
+    backgroundColor: "#F8FAFC",
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 20,
+  },
+  modalDetailBlock: {
+    marginBottom: 16,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E2E8F0",
+  },
+  modalLabel: {
+    fontSize: 13,
+    color: "#94A3B8",
+    fontWeight: "600",
+    textTransform: "uppercase",
+    marginBottom: 4,
+    letterSpacing: 0.5,
+  },
+  modalValue: {
+    fontSize: 16,
+    color: "#1E293B",
+    fontWeight: "700",
+  },
+  modalDescriptionText: {
+    fontSize: 15,
+    color: "#475569",
+    lineHeight: 24,
+    marginTop: 4,
+  },
+  modalCloseBtn: {
+    backgroundColor: "#6366F1",
+    paddingVertical: 16,
+    borderRadius: 16,
+    alignItems: "center",
+  },
+  modalCloseText: {
     color: "#FFFFFF",
     fontSize: 16,
     fontWeight: "700",
