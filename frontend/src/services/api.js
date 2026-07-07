@@ -4,7 +4,7 @@ import { router } from "expo-router";
 import { Alert } from "react-native";
 
 const api = axios.create({
-  baseURL: "http://192.168.1.11:8081/api",
+  baseURL: "https://campus-placement-app-production-1b33.up.railway.app/api",
 });
 
 api.interceptors.request.use(async (config) => {
