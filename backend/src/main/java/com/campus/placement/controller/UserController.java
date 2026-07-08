@@ -62,16 +62,9 @@ public ResponseEntity<Resource> getResume(
         @PathVariable String fileName
 ) throws IOException {
 
-    Path path = Paths.get(System.getProperty("user.dir"),
-            "uploads",
-            "resumes",
-            fileName);
-
-    System.out.println("Looking for file: " + path.toAbsolutePath());
+    Path path = Paths.get("uploads/resumes").resolve(fileName);
 
     Resource resource = new UrlResource(path.toUri());
-
-    System.out.println("Exists = " + resource.exists());
 
     if (!resource.exists()) {
         return ResponseEntity.notFound().build();
@@ -79,6 +72,8 @@ public ResponseEntity<Resource> getResume(
 
     return ResponseEntity.ok()
             .contentType(MediaType.APPLICATION_PDF)
+            .header(HttpHeaders.CONTENT_DISPOSITION,
+                    "inline; filename=\"" + fileName + "\"")
             .body(resource);
 }
 

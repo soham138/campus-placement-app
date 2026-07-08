@@ -38,15 +38,19 @@ export default function AdminStudentsScreen() {
     }
   };
 
-  const openResume = async (resume) => {
-    if (!resume) {
-      Alert.alert("Notice", "This student hasn't uploaded a resume yet.");
-      return;
-    }
-    const url = `http://192.168.1.11:8081/api/users/resume/${resume}`;
-    await Linking.openURL(url);
-  };
+  const api = axios.create({
+    baseURL: "https://campus-placement-app-production-1b33.up.railway.app/api",
+});
+  const API_URL = api.defaults.baseURL.replace("/api", "");
 
+const openResume = async (resume) => {
+  if (!resume) {
+    Alert.alert("Resume not uploaded");
+    return;
+  }
+
+  Linking.openURL(`${API_URL}/api/users/resume/${resume}`);
+};
   const deleteStudent = (id) => {
     Alert.alert(
       "Remove Student",
