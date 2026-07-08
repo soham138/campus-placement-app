@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   Alert,
   SafeAreaView,
   Platform,
+  RefreshControl,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import api from "../services/api";
@@ -15,6 +16,7 @@ import api from "../services/api";
 export default function MyApplicationsScreen() {
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     fetchApplications();
@@ -31,6 +33,12 @@ export default function MyApplicationsScreen() {
       setLoading(false);
     }
   };
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await fetchApplications();
+    setRefreshing(false);
+  }, []);
 
   // Helper function to color-code the status badge
   const getStatusStyle = (status = "Pending") => {
@@ -117,6 +125,14 @@ export default function MyApplicationsScreen() {
         ListHeaderComponent={renderHeader}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.container}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#10B981" // iOS color matches the theme
+            colors={["#10B981"]} // Android color matches the theme
+          />
+        }
         // Shows a nice empty state if the user hasn't applied to anything yet
         ListEmptyComponent={
           <View style={styles.emptyContainer}>

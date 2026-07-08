@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -9,6 +9,7 @@ import {
   SafeAreaView,
   Platform,
   Alert,
+  RefreshControl,
 } from "react-native";
 import * as SecureStore from "expo-secure-store";
 import { router } from "expo-router";
@@ -17,6 +18,7 @@ import api from "../../src/services/api";
 
 export default function Dashboard() {
   const [data, setData] = useState(null);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     loadDashboard();
@@ -31,6 +33,12 @@ export default function Dashboard() {
       Alert.alert("Error", "Unable to load dashboard");
     }
   };
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await loadDashboard();
+    setRefreshing(false);
+  }, []);
 
   const logout = () => {
     Alert.alert("Sign Out", "Are you sure you want to sign out?", [
@@ -61,6 +69,14 @@ export default function Dashboard() {
       <ScrollView
         contentContainerStyle={styles.container}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#6366F1"
+            colors={["#6366F1"]}
+          />
+        }
       >
         {/* Header */}
         <View style={styles.header}>
@@ -69,169 +85,78 @@ export default function Dashboard() {
             <Text style={styles.title}>Dashboard</Text>
           </View>
 
-          <TouchableOpacity
-            style={styles.logoutIconBtn}
-            onPress={logout}
-          >
-            <Ionicons
-              name="log-out-outline"
-              size={24}
-              color="#EF4444"
-            />
+          <TouchableOpacity style={styles.logoutIconBtn} onPress={logout}>
+            <Ionicons name="log-out-outline" size={24} color="#EF4444" />
           </TouchableOpacity>
         </View>
 
         {/* Students */}
         <View style={[styles.card, styles.primaryCard]}>
           <View style={styles.cardHeader}>
-            <View
-              style={[
-                styles.iconWrapper,
-                { backgroundColor: "#EEF2FF" },
-              ]}
-            >
-              <Ionicons
-                name="people"
-                size={28}
-                color="#6366F1"
-              />
+            <View style={[styles.iconWrapper, { backgroundColor: "#EEF2FF" }]}>
+              <Ionicons name="people" size={28} color="#6366F1" />
             </View>
           </View>
 
           <View style={styles.cardBody}>
-            <Text style={styles.number}>
-              {data.totalStudents}
-            </Text>
-
-            <Text style={styles.cardTitle}>
-              Registered Students
-            </Text>
+            <Text style={styles.number}>{data.totalStudents}</Text>
+            <Text style={styles.cardTitle}>Registered Students</Text>
           </View>
         </View>
 
         {/* Jobs + Applications */}
         <View style={styles.row}>
           <View style={[styles.card, styles.halfCard]}>
-            <View
-              style={[
-                styles.smallIcon,
-                { backgroundColor: "#FFF7ED" },
-              ]}
-            >
-              <Ionicons
-                name="briefcase"
-                size={22}
-                color="#F59E0B"
-              />
+            <View style={[styles.smallIcon, { backgroundColor: "#FFF7ED" }]}>
+              <Ionicons name="briefcase" size={22} color="#F59E0B" />
             </View>
 
-            <Text style={styles.numberSmall}>
-              {data.totalJobs}
-            </Text>
-
-            <Text style={styles.cardTitleSmall}>
-              Jobs
-            </Text>
+            <Text style={styles.numberSmall}>{data.totalJobs}</Text>
+            <Text style={styles.cardTitleSmall}>Jobs</Text>
           </View>
 
           <View style={[styles.card, styles.halfCard]}>
-            <View
-              style={[
-                styles.smallIcon,
-                { backgroundColor: "#ECFDF5" },
-              ]}
-            >
-              <Ionicons
-                name="document-text"
-                size={22}
-                color="#10B981"
-              />
+            <View style={[styles.smallIcon, { backgroundColor: "#ECFDF5" }]}>
+              <Ionicons name="document-text" size={22} color="#10B981" />
             </View>
 
-            <Text style={styles.numberSmall}>
-              {data.totalApplications}
-            </Text>
-
-            <Text style={styles.cardTitleSmall}>
-              Applications
-            </Text>
+            <Text style={styles.numberSmall}>{data.totalApplications}</Text>
+            <Text style={styles.cardTitleSmall}>Applications</Text>
           </View>
         </View>
 
         {/* Approved + Pending */}
         <View style={styles.row}>
           <View style={[styles.card, styles.halfCard]}>
-            <View
-              style={[
-                styles.smallIcon,
-                { backgroundColor: "#DCFCE7" },
-              ]}
-            >
-              <Ionicons
-                name="checkmark-circle"
-                size={22}
-                color="#22C55E"
-              />
+            <View style={[styles.smallIcon, { backgroundColor: "#DCFCE7" }]}>
+              <Ionicons name="checkmark-circle" size={22} color="#22C55E" />
             </View>
 
-            <Text style={styles.numberSmall}>
-              {data.approvedApplications}
-            </Text>
-
-            <Text style={styles.cardTitleSmall}>
-              Approved
-            </Text>
+            <Text style={styles.numberSmall}>{data.approvedApplications}</Text>
+            <Text style={styles.cardTitleSmall}>Approved</Text>
           </View>
 
           <View style={[styles.card, styles.halfCard]}>
-            <View
-              style={[
-                styles.smallIcon,
-                { backgroundColor: "#FEF9C3" },
-              ]}
-            >
-              <Ionicons
-                name="time"
-                size={22}
-                color="#EAB308"
-              />
+            <View style={[styles.smallIcon, { backgroundColor: "#FEF9C3" }]}>
+              <Ionicons name="time" size={22} color="#EAB308" />
             </View>
 
-            <Text style={styles.numberSmall}>
-              {data.pendingApplications}
-            </Text>
-
-            <Text style={styles.cardTitleSmall}>
-              Pending
-            </Text>
+            <Text style={styles.numberSmall}>{data.pendingApplications}</Text>
+            <Text style={styles.cardTitleSmall}>Pending</Text>
           </View>
         </View>
 
         {/* Rejected */}
         <View style={[styles.card, styles.primaryCard]}>
           <View style={styles.cardHeader}>
-            <View
-              style={[
-                styles.iconWrapper,
-                { backgroundColor: "#FEE2E2" },
-              ]}
-            >
-              <Ionicons
-                name="close-circle"
-                size={28}
-                color="#EF4444"
-              />
+            <View style={[styles.iconWrapper, { backgroundColor: "#FEE2E2" }]}>
+              <Ionicons name="close-circle" size={28} color="#EF4444" />
             </View>
           </View>
 
           <View style={styles.cardBody}>
-            <Text style={styles.number}>
-              {data.rejectedApplications}
-            </Text>
-
-            <Text style={styles.cardTitle}>
-              Rejected Applications
-            </Text>
+            <Text style={styles.number}>{data.rejectedApplications}</Text>
+            <Text style={styles.cardTitle}>Rejected Applications</Text>
           </View>
         </View>
       </ScrollView>
