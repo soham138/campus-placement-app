@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Campus Placement",
-"slug": "campus-placement",
+"slug": "frontend",
 
     "version": "1.0.0",
     "orientation": "portrait",
@@ -33,7 +33,7 @@
         "expo-splash-screen",
         {
           "image": "./assets/images/splash.png",
-          "imageWidth": 200,
+         
           "resizeMode": "contain",
           "backgroundColor": "#ffffff",
           "dark": {
