@@ -1,204 +1,60 @@
 # 🎓 Campus Placement App
 
-A full-stack Campus Placement Management System that simplifies the placement process for students, recruiters, and placement officers. The application allows students to apply for jobs, companies to post opportunities, and administrators to manage the entire placement workflow efficiently.
+![React Native](https://img.shields.io/badge/React_Native-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+![Spring Boot](https://img.shields.io/badge/Spring_Boot-6DB33F?style=for-the-badge&logo=Spring-Boot&logoColor=white)
+![MySQL](https://img.shields.io/badge/MySQL-005C84?style=for-the-badge&logo=mysql&logoColor=white)
+![JWT](https://img.shields.io/badge/JWT-black?style=for-the-badge&logo=JSON%20web%20tokens)
+
+> A full-stack Campus Placement Management System that enables students to discover placement opportunities, apply for jobs, upload resumes, and track application status while allowing administrators to manage students, jobs, and applications through an intuitive dashboard.
 
 ---
 
-## 🚀 Features
+## ✨ Features
 
-### 👨‍🎓 Student
-- Secure Login & Registration
-- View Available Companies
-- Apply for Jobs
-- Track Application Status
-- View Profile
-- Receive Placement Updates
+### 🧑‍🎓 Student Module
+* **Authentication:** Secure Login & Registration using JWT Authentication.
+* **Job Discovery:** View all available placement opportunities.
+* **Application Tracking:** Apply for jobs with one click and track status (Applied, Approved, Rejected).
+* **Document Management:** Upload, view, and update resumes (PDF).
+* **Personalized Dashboard:** View placement statistics and manage your personal profile.
 
-### 🏢 Recruiter
-- Secure Authentication
-- Post Job Opportunities
-- View Applicants
-- Manage Job Listings
-- Update Application Status
-
-### 👨‍💼 Admin
-- Dashboard Overview
-- Manage Students
-- Manage Recruiters
-- Manage Companies
-- Approve Recruiters
-- Monitor Applications
+### 👨‍💼 Admin Module
+* **Admin Controls:** Secure Admin Login and role-based authorization.
+* **Job Management:** Add, edit, and delete job postings.
+* **Student Oversight:** Manage student accounts, view profiles, and access uploaded resumes.
+* **Application Processing:** View all job applications and update their statuses.
+* **Analytics Dashboard:** View global statistics including total students, jobs, and recent applications.
 
 ---
 
-## 🛠 Tech Stack
+## 🛠️ Tech Stack
 
-### Frontend
-- React Native
-- Expo
-- Expo Router
-- Axios
-
-### Backend
-- Java
-- Spring Boot
-- Spring Security
-- JWT Authentication
-
-### Database
-- MySQL
-
-### Storage
-- Expo Secure Store
+| Category | Technologies |
+| :--- | :--- |
+| **Frontend** | React Native (Expo), Expo Router, React Navigation, Axios, Expo Secure Store, Expo Document Picker |
+| **Backend** | Java, Spring Boot, Spring Data JPA, Spring Security, JWT Authentication, Maven |
+| **Database** | MySQL |
+| **Deployment** | Backend: Railway \| Android App: Expo EAS Build |
 
 ---
 
 ## 📂 Project Structure
 
-```
-Campus Placement App
+```text
+Campus-Placement-App
 │
-├── Frontend (React Native + Expo)
-│   ├── Student Module
-│   ├── Recruiter Module
-│   ├── Admin Module
-│   └── Authentication
+├── backend
+│   ├── Controller
+│   ├── Service
+│   ├── Repository
+│   ├── Entity
+│   ├── DTO
+│   ├── Config
+│   └── Security
 │
-├── Backend (Spring Boot)
-│   ├── Controllers
-│   ├── Services
-│   ├── Repositories
-│   ├── Models
-│   └── Security (JWT)
-│
-└── Database
-    └── MySQL
-```
-
----
-
-## 🔐 Authentication
-
-The application uses **JWT (JSON Web Token)** authentication for secure login and protected API access.
-
-Features include:
-
-- User Login
-- Token-based Authentication
-- Protected Routes
-- Secure Session Management
-- Role-Based Access Control
-
----
-
-## 📸 Screenshots
-
-> Add screenshots here after uploading them.
-
-Example:
-
-```
-screenshots/
-    login.png
-    dashboard.png
-    jobs.png
-    profile.png
-```
-
----
-
-## ⚙ Installation
-
-### Clone Repository
-
-```bash
-git clone https://github.com/soham138/campus-placement-app.git
-```
-
----
-
-### Backend Setup
-
-```bash
-cd backend
-```
-
-Configure MySQL database in
-
-```
-application.properties
-```
-
-Run
-
-```bash
-mvn spring-boot:run
-```
-
----
-
-### Frontend Setup
-
-```bash
-cd frontend
-```
-
-Install dependencies
-
-```bash
-npm install
-```
-
-Start Expo
-
-```bash
-npx expo start
-```
-
----
-
-## 📊 Modules
-
-- Authentication
-- Student Management
-- Recruiter Management
-- Company Management
-- Job Management
-- Application Tracking
-- Dashboard
-- Profile Management
-
----
-
-## 📌 Future Enhancements
-
-- Resume Upload
-- Interview Scheduling
-- Push Notifications
-- Email Notifications
-- Resume Parser
-- Analytics Dashboard
-- Placement Statistics
-- Chat Support
-
----
-
-## 👨‍💻 Author
-
-**Soham Yadav**
-
-GitHub: https://github.com/soham138
-
-LinkedIn: 
-
----
-
-## 📄 License
-
-This project is licensed under the MIT License.
-
----
-
-## ⭐ Support
-
-If you found this project helpful, please consider giving it a ⭐ on GitHub.
+└── frontend
+    ├── app
+    ├── components
+    ├── services
+    ├── assets
+    └── navigation
